@@ -1,94 +1,94 @@
-import React, {Component} from 'react';
-import logo from './logo.svg';
+import React from 'react'
+import {
+  BrowserRouter as Router,
+  Route,
+  Link
+} from 'react-router-dom';
+import { Provider, inject, observer } from 'mobx-react';
+import Login from './scenes/Login';
+import User from './stores/User';
+import SignupStore from './stores/Signup'
+import PrivateRoute from './components/private-route';
+import Logout from './components/logout';
+import authget from './data/auth-get';
+import Signup from './scenes/Signup';
+import DevTools from 'mobx-react-devtools';
+import Feeds from './scenes/Feeds';
+import FeedStore from './stores/Feeds'; 
 
-//styles
-import './App.less';
-import './App.scss';
-import './App.styl';
-import styles from './Modules.css';
+window.Feedstore = FeedStore
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo"/>
-          <h2 className="App-title"> ☢ custom-react-scripts ☢ </h2>
-          <div className="App-subtitle"> allow custom config for create-react-app without ejecting</div>
-        </div>
+const Home = inject('User')(observer(({ User }) =>
+  <div>
+    <h2>Hello, {User.name}</h2>
+  </div>
+))
 
-        <div className={styles.description}>
+const About = () => (
+  <div>
+    <h2>About</h2>
+  </div>
+)
 
-          <div className={styles.command}>
-            <code>create-react-app my-app --scripts-version custom-react-scripts</code>
-          </div>
+const Topic = ({ match }) => (
+  <div>
+    <h3>{match.params.topicId}</h3>
+  </div>
+)
 
-          <p> If you want to enable/disable certain features just modify the <b>.env</b> file in the root directory of
-              the
-              project.
-          </p>
+const Topics = ({ match }) => (
+  <div>
+    <h2>Topics</h2>
+    <ul>
+      <li>
+        <Link to={`${match.url}/rendering`}>
+          Rendering with React
+        </Link>
+      </li>
+      <li>
+        <Link to={`${match.url}/components`}>
+          Components
+        </Link>
+      </li>
+      <li>
+        <Link to={`${match.url}/props-v-state`}>
+          Props v. State
+        </Link>
+      </li>
+    </ul>
 
-          <b> Styling </b>
-          <ul className="configs style-configs">
-            <li>
-              <code>REACT_APP_SASS=true</code>
-              <span>- Enable SASS</span>
-            </li>
-            <li>
-              <code>REACT_APP_LESS=true</code>
-              <span>- Enable LESS</span>
-            </li>
-            <li>
-              <code>REACT_APP_STYLUS=true</code>
-              <span>- Enable Stylus</span>
-            </li>
-            <li>
-              <code>REACT_APP_CSS_MODULES=true</code>
-              <span>- Enable CSS modules </span>
-            </li>
-          </ul>
+    <Route path={`${match.url}/:topicId`} component={Topic} />
+    <Route exact path={match.url} render={() => (
+      <h3>Please select a topic.</h3>
+    )} />
+  </div>
+)
 
-          <b> ⚠️ Babel </b>
+const Stores = { User, Signup: SignupStore, Feeds: FeedStore }
 
-          <div className={styles.warning}>
-            (Please note that these features are highly experimental (especially stage-0) and still not a part of the ES
-            specification. <br/>
-            Use them at
-            your own risk of breaking backwards compatibility if they don't make the final version of the spec.)
-          </div>
+const App = () => (
+  <Provider {...Stores}>
+    <Router>
+      <div>
+        <DevTools />
+        <ul>
+          <li><Link to="/">Home</Link></li>
+          <li><Link to="/about">About</Link></li>
+          <li><Link to="/topics">Topics</Link></li>
+          <li><Link to="/feeds">Feeds</Link></li>
+          <li><Link to="/logout">Logout</Link></li>
+        </ul>
 
-          <ul className="configs babel-configs">
-            <li>
-              <code>REACT_APP_BABEL_STAGE_0=true</code>
-              <span>- Enable stage-0 preset</span>
-            </li>
-            <li>
-              <code>REACT_APP_DECORATORS=true</code>
-              <span>- Enable usage of decorators</span>
-            </li>
-          </ul>
-
-          <b> Others </b>
-          <ul className="configs style-configs">
-            <li>
-              <code>PORT=3015</code>
-              <span>- change default port (supported in CRA by default)</span>
-            </li>
-            <li>
-              <code>OPEN_BROWSER=false</code>
-              <span>- don't open browser after running webpack server</span>
-            </li>
-          </ul>
-
-          <br/>
-          <br/>
-          <a target="_blank" className={styles.readmeLink} href="https://github.com/kitze/create-react-app/tree/master/packages/react-scripts">
-            Link to full README.md
-          </a>
-        </div>
+        <hr />
+        <Route path="/signup" component={Signup} />
+        <Route exact path="/" component={Home} />
+        <PrivateRoute path="/about" component={About} />
+        <PrivateRoute path="/feeds" component={Feeds} />
+        <Route path="/topics" component={Topics} />
+        <Route path="/login" component={Login} />
+        <Route path="/logout" component={Logout} />
       </div>
-    )
-  }
-}
-
-export default App;
+    </Router>
+  </Provider>
+)
+export default App; 
